@@ -4,32 +4,40 @@ services:
   billionaire-brain-assistant:
     build: .
     ports:
-      - "8000:8000"
+      - "4000:4000"
     environment:
-      - ENVIRONMENT=development
-      - REVENUE_POTENTIAL=280000
+      - NODE_ENV=production
+      - REPO_NAME=billionaire-brain-assistant
+      - ORGANIZATION=Worldwidebro
+      - DATABASE_URL=postgresql://user:pass@db:5432/billionaire-brain-assistant
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./data:/app/data
     depends_on:
-      - postgres
-      - redis
+      - db
+    networks:
+      - billionaire-empire
+    restart: unless-stopped
 
-  postgres:
+  db:
     image: postgres:15
     environment:
-      POSTGRES_DB: billionaire-brain-assistant
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
+      - POSTGRES_DB=billionaire-brain-assistant
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - billionaire-empire
 
   redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
+    image: redis:7-alpine
+    networks:
+      - billionaire-empire
 
 volumes:
   postgres_data:
+
+networks:
+  billionaire-empire:
+    driver: bridge
